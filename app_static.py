@@ -1,3 +1,5 @@
+# user_request =  "Create a quotation for 100 bricks at ₹20 each and 50 bags of cement at ₹300 each for client John."
+
 import re
 import pdfkit
 import json
@@ -10,6 +12,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
 model = ChatGoogleGenerativeAI(model = 'gemini-2.0-flash', google_api_key = api_key)
+wkhtmltopdf_path = os.getenv("WKHTMLTOPDF_PATH")
 
 app = Flask(__name__)
 
@@ -49,11 +52,7 @@ def generate_pdf():
         Respond ONLY with valid JSON. Do NOT include any explanation or extra text.
 
         Input: {usermessage}
-        """
-
-    user_request =  """
-         Create a quotation for 100 bricks at ₹20 each and 50 bags of cement at ₹300 each for client John.
-                """
+        """     
 
     prompt_template = ChatPromptTemplate.from_template(template)
 
@@ -65,14 +64,16 @@ def generate_pdf():
         match = re.search(r'\{.*\}', response.content, re.DOTALL)
         if match:
             json_str = match.group(0)
+            data = json.loads(json_str)
         else:
             print("No valid JSON object found in the response.")
 
     except json.JSONDecodeError as e:
         print("Failed to decode JSON:", e)
 
-    data = json.loads(json_str)
     quotation_details = data["quotation_details"]
+
+    client_name = quotation_details["client"]
 
     # Render HTML with data
     html = render_template(
@@ -83,8 +84,8 @@ def generate_pdf():
     )
 
     # Save PDF
-    pdf_file = "quotation.pdf"
-    config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')  # adjust for your OS
+    pdf_file = f"{client_name}_quotation.pdf"
+    config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)  # adjust for your OS
     pdfkit.from_string(html, pdf_file, configuration=config)
 
     # Send the file
