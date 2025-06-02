@@ -7,10 +7,11 @@
 
 <body>
     <h2>Enter Quotation Request</h2>
-    <form action="/generate_pdf" method="post">
+    <form action="/generate_pdf" method="POST">
         <textarea name="user_input" rows="5" cols="60"
             placeholder="E.g. Create a quotation for 10 chairs at ₹500 each for client Alice."></textarea><br><br>
-        <button type="submit">Generate PDF</button>
+        <button type="submit" name="action" value="preview">Preview</button>
+        <button type="submit" name="action" value="download">Download PDF</button>
     </form>
 </body>
 

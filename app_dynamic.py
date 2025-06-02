@@ -47,17 +47,14 @@ def generate_pdf():
 
     html_content = response.content.strip()
     
-    # Clean up triple quotes and markdown-style language tag
     if html_content.startswith("'''html") or html_content.startswith("```html"):
         html_content = re.sub(r"^(['`]{3}html\s*)", "", html_content)
         html_content = re.sub(r"(['`]{3})\s*$", "", html_content)
 
 
-    # Optional safety check
     if "<html" not in html_content.lower():
         return "Model did not return valid HTML content.", 500
 
-    # Convert HTML to PDF
     pdf_file = "quotation.pdf"
     wkhtmltopdf_path = os.getenv("WKHTMLTOPDF_PATH")
     config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
